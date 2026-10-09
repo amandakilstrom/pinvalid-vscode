@@ -1,71 +1,73 @@
-# fixerupper README
+# pinvalid-vscode
 
-This is the README for your extension "fixerupper". After writing up a brief description, we recommend including the following sections.
+A small VS Code extension that checks embedded-project configuration files for pin conflicts.
+
+If the same pin is assigned twice in a `project.toml`, the extension underlines both places in the editor and lists them in the Problems panel.
+
+![Pin conflict shown in the editor](docs/screenshot.png)
+
+## Example
+
+```toml
+[chip]
+name = "STM32F407"
+
+[[pin]]
+name = "PA5"
+function = "SPI1_SCK"
+
+[[pin]]
+name = "PA5"
+function = "GPIO_OUT"
+```
+
+Result: both `name = "PA5"` lines are marked with the error `Pin PA5 is defined 2 times`.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- Detects pins that are defined more than once in `project.toml`
+- Runs automatically when the file is saved
+- Can also be run manually from the Command Palette: **Pinvalid: Check project**
+- Reports TOML syntax errors instead of failing silently
 
-For example if there is an image subfolder under your extension project workspace:
+## Getting started
 
-\!\[feature X\]\(images/feature-x.png\)
+Requirements: Node.js (LTS) and VS Code.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+```bash
+git clone https://github.com/amandakilstrom/fixerupper.git
+cd pinvalid-vscode
+npm install
+```
 
-## Requirements
+Open the folder in VS Code and press **F5**. A second window (Extension Development Host) opens with the extension loaded. Create a file named `project.toml` there, add a duplicated pin and save.
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+## How it works
 
-## Extension Settings
+- The file is parsed with [`smol-toml`](https://github.com/squirrelchat/smol-toml).
+- Pin names are counted, and every line that mentions a pin used more than once gets a diagnostic through VS Code's `DiagnosticCollection` API.
+- The project is bundled with esbuild.
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+## Project structure
 
-For example:
+```
+src/extension.ts   Activation, command registration and validation logic
+package.json       Extension manifest (commands, activation)
+esbuild.js         Build script
+```
 
-This extension contributes the following settings:
+## Roadmap
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+- [ ] Validate pins and functions against per-chip data (`chips.json`)
+- [ ] Mark the exact pin name instead of the whole line
+- [ ] Automated tests
+- [ ] Rust CLI (`pinvalid`) that does the validation, with the extension calling it
+- [ ] Package and publish as a `.vsix`
 
-## Known Issues
+## Why this project
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+I built this to learn how developer tooling is made: extension APIs, file parsing and diagnostics in TypeScript, outside the browser. It is inspired by how configuration tools in the embedded world, such as the STM32Cube tools, check a project before code is generated.
 
-## Release Notes
+## Author
 
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Amanda Kilström
