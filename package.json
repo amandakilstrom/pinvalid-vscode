@@ -3,6 +3,7 @@
   "displayName": "Pinvalid",
   "description": "Flags duplicate pin assignments in embedded project.toml files.",
   "version": "0.0.1",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.140.0"
   },
