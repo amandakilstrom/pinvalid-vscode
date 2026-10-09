@@ -1,26 +1,62 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { parse } from 'smol-toml';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+const diagnostics = vscode.languages.createDiagnosticCollection('pinvalid');
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "fixerupper" is now active!');
+function checkDocument(doc: vscode.TextDocument) {
+	if (!doc.fileName.endsWith('project.toml')) {
+		return;
+	}
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('fixerupper.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from FixerUpper!');
-	});
+	const found: vscode.Diagnostic[] = [];
 
-	context.subscriptions.push(disposable);
+	try {
+		const data = parse(doc.getText()) as { pin?: { name: string; function: string }[] };
+		const seen = new Map<string, number>();
+	
+		for (const pin of data.pin ?? []) {
+			seen.set(pin.name, (seen.get(pin.name) ?? 0) + 1);
+		}
+
+		const lines = doc.getText().split('\n');
+		lines.forEach((line, i) => {
+			for (const [name, count] of seen) {
+				if (count > 1 && line.includes(`"${name}"`)) {
+					found.push(new vscode.Diagnostic(
+						new vscode.Range(i, 0, i, line.length),
+						`Pin ${name} is defined ${count} times`,
+						vscode.DiagnosticSeverity.Error
+					));
+				}
+			}
+		});
+
+	} catch (error) {
+		console.error('Error parsing TOML:', error);
+		found.push(new vscode.Diagnostic(
+			new vscode.Range(0, 0, 0, 1),
+			`Error parsing TOML: ${error}`,
+			vscode.DiagnosticSeverity.Error
+		));
+	}
+
+	diagnostics.set(doc.uri, found);
 }
 
-// This method is called when your extension is deactivated
+export function activate(context: vscode.ExtensionContext) {
+
+	console.log('Congratulations, your extension "fixerupper" is now active!');
+
+	context.subscriptions.push(
+		diagnostics,
+		vscode.commands.registerCommand('fixerupper.checkPins', () => {
+			const doc = vscode.window.activeTextEditor?.document;
+			if (doc) {
+				checkDocument(doc);
+			}
+		}),
+		vscode.workspace.onDidSaveTextDocument(checkDocument)
+	);
+}
+
 export function deactivate() {}
