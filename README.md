@@ -26,7 +26,7 @@ Result: both `name = "PA5"` lines are marked with the error `Pin PA5 is defined 
 ## Features
 
 - Detects pins that are defined more than once in `project.toml`
-- Runs automatically when the file is saved
+- Runs automatically when a `project.toml` is opened or saved
 - Can also be run manually from the Command Palette: **Pinvalid: Check project**
 - Reports TOML syntax errors instead of failing silently
 
@@ -35,7 +35,7 @@ Result: both `name = "PA5"` lines are marked with the error `Pin PA5 is defined 
 Requirements: Node.js (LTS) and VS Code.
 
 ```bash
-git clone https://github.com/amandakilstrom/fixerupper.git
+git clone https://github.com/amandakilstrom/pinvalid-vscode.git
 cd pinvalid-vscode
 npm install
 ```

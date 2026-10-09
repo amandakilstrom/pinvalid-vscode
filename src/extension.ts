@@ -45,18 +45,21 @@ function checkDocument(doc: vscode.TextDocument) {
 
 export function activate(context: vscode.ExtensionContext) {
 
-	console.log('Congratulations, your extension "fixerupper" is now active!');
+	// console.log('Pinvalid is now active');
 
 	context.subscriptions.push(
 		diagnostics,
-		vscode.commands.registerCommand('fixerupper.checkPins', () => {
+		vscode.commands.registerCommand('pinvalid-vscode.checkPins', () => {
 			const doc = vscode.window.activeTextEditor?.document;
 			if (doc) {
 				checkDocument(doc);
 			}
 		}),
+		vscode.workspace.onDidOpenTextDocument(checkDocument),
 		vscode.workspace.onDidSaveTextDocument(checkDocument)
 	);
+
+	vscode.workspace.textDocuments.forEach(checkDocument);
 }
 
 export function deactivate() {}

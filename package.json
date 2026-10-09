@@ -1,7 +1,7 @@
 {
-  "name": "fixerupper",
-  "displayName": "FixerUpper",
-  "description": "Its my first file reader with TypeScript",
+  "name": "pinvalid-vscode",
+  "displayName": "Pinvalid",
+  "description": "Flags duplicate pin assignments in embedded project.toml files.",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.140.0"
@@ -10,13 +10,13 @@
     "Other"
   ],
   "activationEvents": [ 
-    "onLanguage:toml"
+    "onStartupFinished"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "fixerupper.checkPins",
+        "command": "pinvalid-vscode.checkPins",
         "title": "Pinvalid: Check project"
       }
     ]
@@ -53,5 +53,9 @@
   },
   "dependencies": {
     "smol-toml": "^1.9.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/amandakilstrom/pinvalid-vscode.git"
   }
 }
